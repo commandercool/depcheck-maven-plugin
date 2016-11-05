@@ -38,7 +38,8 @@ public class HashingMojo extends AbstractMojo {
                             artifact.getId()));
                 }
                 try {
-                    String outEntry = MD5Generator.generateChecksum(String.format("%s %s", file.getAbsolutePath(), artifact.getId()));
+                    String outEntry = String.format("%s %s", MD5Generator.generateChecksum(file.getAbsolutePath()),
+                            artifact.getId());
                     out.write(outEntry);
                     out.write(LINE_SEPARATOR);
                     getLog().info(outEntry);
