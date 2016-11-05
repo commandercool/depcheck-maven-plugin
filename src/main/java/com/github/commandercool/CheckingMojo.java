@@ -33,11 +33,11 @@ public class CheckingMojo extends AbstractMojo {
                 String[] contents = line.split(" ");
                 if (!MD5Generator.generateChecksum(getArtifact(contents[1]).getFile().getAbsolutePath())
                         .equals(contents[0].trim())) {
-                    throw new MojoFailureException("Mismatch in checksum for artifact " + contents[1]);
+                    throw new MojoFailureException(String.format("Mismatch in checksum for artifact %s", contents[1]));
                 }
             }
         } catch (IOException ex) {
-            throw new MojoExecutionException("Exception reading checksum file " + input);
+            throw new MojoExecutionException(String.format("Exception reading checksum file %s", input));
         }
         getLog().info("Checksums are verified successfully");
     }

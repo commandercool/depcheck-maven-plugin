@@ -34,23 +34,22 @@ public class HashingMojo extends AbstractMojo {
             for (Artifact artifact : mavenProject.getDependencyArtifacts()) {
                 File file = artifact.getFile();
                 if (file == null) {
-                    throw new MojoExecutionException("No file was found for artifact " +
-                            artifact.getId());
+                    throw new MojoExecutionException(String.format("No file was found for artifact %s",
+                            artifact.getId()));
                 }
                 try {
-                    String outEntry = MD5Generator.generateChecksum(file.getAbsolutePath()) + " " +
-                            artifact.getId();
+                    String outEntry = MD5Generator.generateChecksum(String.format("%s %s", file.getAbsolutePath(), artifact.getId()));
                     out.write(outEntry);
                     out.write(LINE_SEPARATOR);
                     getLog().info(outEntry);
                 } catch (IOException e) {
-                    throw new MojoExecutionException("Exception reading artifact jar path: " +
-                            file.getAbsolutePath(), e);
+                    throw new MojoExecutionException(String.format("Exception reading artifact jar path: %s",
+                            file.getAbsolutePath()), e);
                 }
             }
         } catch (IOException ex) {
             throw new MojoExecutionException("Unable to create output file", ex);
         }
-        getLog().info("Checksums writed out to " + output);
+        getLog().info(String.format("Checksums are written out to %s", output));
     }
 }
