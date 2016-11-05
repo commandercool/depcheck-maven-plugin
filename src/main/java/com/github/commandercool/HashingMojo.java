@@ -18,7 +18,7 @@ import java.io.IOException;
 /**
  * Created by Alex on 16.10.2016.
  */
-@Mojo(name = "hash", defaultPhase = LifecyclePhase.COMPILE)
+@Mojo(name = "hash", defaultPhase = LifecyclePhase.INSTALL)
 public class HashingMojo extends AbstractMojo {
 
     private static final String LINE_SEPARATOR = System.getProperty("line.separator");
