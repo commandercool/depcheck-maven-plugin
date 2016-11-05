@@ -11,13 +11,14 @@ import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProject;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 
 /**
  * Created by Alex on 18.10.2016.
  */
-@Mojo(name = "check", defaultPhase = LifecyclePhase.VALIDATE)
+@Mojo(name = "check", defaultPhase = LifecyclePhase.COMPILE)
 public class CheckingMojo extends AbstractMojo {
 
     @Parameter(defaultValue = "hash.md5")
@@ -30,10 +31,21 @@ public class CheckingMojo extends AbstractMojo {
         try (BufferedReader in = new BufferedReader(new FileReader(input))) {
             String line;
             while ((line = in.readLine()) != null) {
+                getLog().info(line);
                 String[] contents = line.split(" ");
-                if (!MD5Generator.generateChecksum(getArtifact(contents[1]).getFile().getAbsolutePath())
-                        .equals(contents[0].trim())) {
-                    throw new MojoFailureException(String.format("Mismatch in checksum for artifact %s", contents[1]));
+                Artifact artifact = getArtifact(contents[1]);
+                if (artifact != null) {
+                    File file = artifact.getFile();
+                    if (file == null) {
+                        throw new MojoExecutionException(String.format("No file found for artifact %s. " +
+                                "Try running compile before check.", artifact));
+                    }
+                    if (!MD5Generator.generateChecksum(file.getAbsolutePath())
+                            .equals(contents[0].trim())) {
+                        throw new MojoFailureException(String.format("Mismatch in checksum for artifact %s", contents[1]));
+                    }
+                } else {
+                    throw new MojoExecutionException(String.format("No artifact found for id %s", contents[1]));
                 }
             }
         } catch (IOException ex) {
