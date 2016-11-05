@@ -5,6 +5,7 @@ import org.apache.maven.artifact.Artifact;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
+import org.apache.maven.plugins.annotations.LifecyclePhase;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProject;
@@ -16,7 +17,7 @@ import java.io.IOException;
 /**
  * Created by Alex on 18.10.2016.
  */
-@Mojo(name = "check")
+@Mojo(name = "check", defaultPhase = LifecyclePhase.VALIDATE)
 public class CheckingMojo extends AbstractMojo {
 
     @Parameter(defaultValue = "hash.md5")
@@ -36,7 +37,7 @@ public class CheckingMojo extends AbstractMojo {
                 }
             }
         } catch (IOException ex) {
-            throw new MojoExecutionException("Exceptino reading checksum file " + input);
+            throw new MojoExecutionException("Exception reading checksum file " + input);
         }
         getLog().info("Checksums are verified successfully");
     }
