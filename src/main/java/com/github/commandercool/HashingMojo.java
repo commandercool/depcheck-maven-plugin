@@ -11,6 +11,7 @@ import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProject;
 
 import java.io.BufferedWriter;
+import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 
@@ -31,15 +32,20 @@ public class HashingMojo extends AbstractMojo {
         getLog().info("Calculating checksums for the artifacts");
         try (BufferedWriter out = new BufferedWriter(new FileWriter(output))) {
             for (Artifact artifact : mavenProject.getDependencyArtifacts()) {
+                File file = artifact.getFile();
+                if (file == null) {
+                    throw new MojoExecutionException("No file was found for artifact " +
+                            artifact.getId());
+                }
                 try {
-                    String outEntry = MD5Generator.generateChecksum(artifact.getFile().getAbsolutePath()) + " " +
+                    String outEntry = MD5Generator.generateChecksum(file.getAbsolutePath()) + " " +
                             artifact.getId();
                     out.write(outEntry);
                     out.write(LINE_SEPARATOR);
                     getLog().info(outEntry);
                 } catch (IOException e) {
                     throw new MojoExecutionException("Exception reading artifact jar path: " +
-                            artifact.getFile().getAbsolutePath(), e);
+                            file.getAbsolutePath(), e);
                 }
             }
         } catch (IOException ex) {
