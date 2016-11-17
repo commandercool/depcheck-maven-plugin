@@ -1,6 +1,7 @@
 package com.github.commandercool;
 
 import com.github.commandercool.utils.MD5Generator;
+import com.github.commandercool.utils.PathCompiler;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.repository.ArtifactRepository;
 import org.apache.maven.plugin.AbstractMojo;
@@ -33,6 +34,7 @@ public class HashingMojo extends AbstractMojo {
 
     public void execute() throws MojoExecutionException, MojoFailureException {
         getLog().info("Calculating checksums for the artifacts");
+        output = PathCompiler.getAbsolutePath(output, mavenProject.getFile().getParent());
         try (BufferedWriter out = new BufferedWriter(new FileWriter(output))) {
             for (Artifact artifact : mavenProject.getDependencyArtifacts()) {
                 File file = localRepository.find(artifact).getFile();
@@ -40,20 +42,32 @@ public class HashingMojo extends AbstractMojo {
                     throw new MojoExecutionException(String.format("No file was found for artifact %s",
                             artifact.getId()));
                 }
-                try {
-                    String outEntry = String.format("%s %s", MD5Generator.generateChecksum(file.getAbsolutePath()),
-                            artifact.getId());
-                    out.write(outEntry);
-                    out.write(LINE_SEPARATOR);
-                    getLog().info(outEntry);
-                } catch (IOException e) {
-                    throw new MojoExecutionException(String.format("Exception reading artifact jar path: %s",
-                            file.getAbsolutePath()), e);
+                if (!isInherited(artifact)) {
+                    try {
+                        String outEntry = String.format("%s %s", MD5Generator.generateChecksum(file.getAbsolutePath()),
+                                artifact.getId());
+                        out.write(outEntry);
+                        out.write(LINE_SEPARATOR);
+                        getLog().info(outEntry);
+                    } catch (IOException e) {
+                        throw new MojoExecutionException(String.format("Exception reading artifact jar path: %s",
+                                file.getAbsolutePath()), e);
+                    }
                 }
             }
         } catch (IOException ex) {
             throw new MojoExecutionException("Unable to create output file", ex);
         }
         getLog().info(String.format("Checksums are written out to %s", output));
+    }
+
+    private boolean isInherited(Artifact artifact) {
+        MavenProject parentProject = mavenProject;
+        while ((parentProject = parentProject.getParent()) != null) {
+            if (parentProject.getDependencyArtifacts().contains(artifact)) {
+                return true;
+            }
+        }
+        return false;
     }
 }

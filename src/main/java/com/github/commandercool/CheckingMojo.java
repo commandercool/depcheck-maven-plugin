@@ -1,6 +1,7 @@
 package com.github.commandercool;
 
 import com.github.commandercool.utils.MD5Generator;
+import com.github.commandercool.utils.PathCompiler;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.repository.ArtifactRepository;
 import org.apache.maven.plugin.AbstractMojo;
@@ -31,6 +32,7 @@ public class CheckingMojo extends AbstractMojo {
 
     @Override
     public void execute() throws MojoExecutionException, MojoFailureException {
+        input = PathCompiler.getAbsolutePath(input, mavenProject.getFile().getParent());
         try (BufferedReader in = new BufferedReader(new FileReader(input))) {
             String line;
             while ((line = in.readLine()) != null) {
